@@ -57,11 +57,11 @@ export function getDeployDebugAPIExpectedVersion(): number {
 }
 export abstract class IDeployDebugAPI implements IVersionable {
   public abstract startRioLog(teamNumber: number, show: boolean): Promise<boolean>;
-  public abstract deployCode(workspace: vscode.WorkspaceFolder): Promise<boolean>;
+  public abstract deployCode(workspace: vscode.WorkspaceFolder, source: vscode.Uri | undefined): Promise<boolean>;
   public abstract registerCodeDeploy(deployer: ICodeDeployer): void;
-  public abstract debugCode(workspace: vscode.WorkspaceFolder): Promise<boolean>;
+  public abstract debugCode(workspace: vscode.WorkspaceFolder, source: vscode.Uri | undefined): Promise<boolean>;
   public abstract registerCodeDebug(deployer: ICodeDeployer): void;
-  public abstract simulateCode(workspace: vscode.WorkspaceFolder): Promise<boolean>;
+  public abstract simulateCode(workspace: vscode.WorkspaceFolder, source: vscode.Uri | undefined): Promise<boolean>;
   public abstract registerCodeSimulate(deployer: ICodeDeployer): void;
   public abstract addLanguageChoice(language: string): void;
   public abstract getLanguageChoices(): string[];
@@ -75,9 +75,9 @@ export function getBuildTestAPIExpectedVersion(): number {
   return deployDebugAPIExpectedVersion;
 }
 export abstract class IBuildTestAPI implements IVersionable {
-  public abstract buildCode(workspace: vscode.WorkspaceFolder): Promise<boolean>;
+  public abstract buildCode(workspace: vscode.WorkspaceFolder, source: vscode.Uri | undefined): Promise<boolean>;
   public abstract registerCodeBuild(builder: ICodeBuilder): void;
-  public abstract testCode(workspace: vscode.WorkspaceFolder): Promise<boolean>;
+  public abstract testCode(workspace: vscode.WorkspaceFolder, source: vscode.Uri | undefined): Promise<boolean>;
   public abstract registerCodeTest(builder: ICodeBuilder): void;
   public abstract addLanguageChoice(language: string): void;
   public getVersion(): number {
@@ -165,7 +165,7 @@ export interface ICodeDeployer {
    *
    * @param teamNumber The team number to deploy to
    */
-  runDeployer(teamNumber: number, workspace: vscode.WorkspaceFolder): Promise<boolean>;
+  runDeployer(teamNumber: number, workspace: vscode.WorkspaceFolder, source: vscode.Uri | undefined): Promise<boolean>;
 
   /**
    * Get the display name to be used for selection
@@ -187,7 +187,7 @@ export interface ICodeBuilder {
   /**
    * Run the command with the specified team number
    */
-  runBuilder(workspace: vscode.WorkspaceFolder): Promise<boolean>;
+  runBuilder(workspace: vscode.WorkspaceFolder, source: vscode.Uri | undefined): Promise<boolean>;
 
   /**
    * Get the display name to be used for selection

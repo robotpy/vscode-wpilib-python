@@ -118,7 +118,7 @@ export class Commands {
       for (const c of commands) {
         const provider: ICommandCreator = {
           getLanguage(): string {
-            return 'java';
+            return 'python';
           },
           getDescription(): string {
             return c.description;

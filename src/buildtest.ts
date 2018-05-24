@@ -6,7 +6,7 @@ import { PyPreferencesAPI } from './pypreferencesapi';
 
 export class BuildTest {
   constructor(buildTestApi: IBuildTestAPI, preferences: IPreferencesAPI, pyPreferences: PyPreferencesAPI) {
-    buildTestApi.addLanguageChoice('java');
+    buildTestApi.addLanguageChoice('python');
 
     buildTestApi.registerCodeBuild({
       async getIsCurrentlyValid(workspace: vscode.WorkspaceFolder): Promise<boolean> {
@@ -14,8 +14,7 @@ export class BuildTest {
         const currentLanguage = prefs.getCurrentLanguage();
         return currentLanguage === 'none' || currentLanguage === 'python';
       },
-      async runBuilder(workspace: vscode.WorkspaceFolder): Promise<boolean> {
-        pyPreferences.getPreferences(workspace);
+      async runBuilder(_: vscode.WorkspaceFolder, __: vscode.Uri | undefined): Promise<boolean> {
         await vscode.window.showInformationMessage('You\'re in python, no need to build.');
         return true;
       },
@@ -30,10 +29,11 @@ export class BuildTest {
     buildTestApi.registerCodeTest({
       async getIsCurrentlyValid(workspace: vscode.WorkspaceFolder): Promise<boolean> {
         const prefs = preferences.getPreferences(workspace);
+        pyPreferences.getPreferences(workspace);
         const currentLanguage = prefs.getCurrentLanguage();
         return currentLanguage === 'none' || currentLanguage === 'python';
       },
-      async runBuilder(_: vscode.WorkspaceFolder): Promise<boolean> {
+      async runBuilder(_: vscode.WorkspaceFolder, _source: vscode.Uri | undefined): Promise<boolean> {
         await vscode.window.showInformationMessage('Work in progress.');
         return true;
       },

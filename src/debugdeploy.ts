@@ -1,8 +1,20 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import { pythonRun } from './executor';
 import { ICodeDeployer, IDeployDebugAPI, IPreferencesAPI } from './externalapi';
 import { PyPreferencesAPI } from './pypreferencesapi';
+
+function getCurrentFileIfPython(): string | undefined {
+  const currentEditor = vscode.window.activeTextEditor;
+  if (currentEditor === undefined) {
+    return undefined;
+  }
+  if (currentEditor.document.fileName.endsWith('.py')) {
+    return currentEditor.document.fileName;
+  }
+  return undefined;
+}
 
 class DebugCodeDeployer implements ICodeDeployer {
   private preferences: IPreferencesAPI;
@@ -18,7 +30,7 @@ class DebugCodeDeployer implements ICodeDeployer {
     const currentLanguage = prefs.getCurrentLanguage();
     return currentLanguage === 'none' || currentLanguage === 'python';
   }
-  public async runDeployer(_teamNumber: number, workspace: vscode.WorkspaceFolder): Promise<boolean> {
+  public async runDeployer(_teamNumber: number, workspace: vscode.WorkspaceFolder, _source: vscode.Uri | undefined): Promise<boolean> {
     this.pyPreferences.getPreferences(workspace);
 
     return true;
@@ -43,10 +55,35 @@ class DeployCodeDeployer implements ICodeDeployer {
   public async getIsCurrentlyValid(workspace: vscode.WorkspaceFolder): Promise<boolean> {
     const prefs = this.preferences.getPreferences(workspace);
     const currentLanguage = prefs.getCurrentLanguage();
-    return currentLanguage === 'none' || currentLanguage === 'java';
+    return currentLanguage === 'none' || currentLanguage === 'python';
   }
-  public async runDeployer(_teamNumber: number, workspace: vscode.WorkspaceFolder): Promise<boolean> {
-    this.pyPreferences.getPreferences(workspace);
+  public async runDeployer(_teamNumber: number, workspace: vscode.WorkspaceFolder, source: vscode.Uri | undefined): Promise<boolean> {
+    let file: string = '';
+    if (source === undefined) {
+      const cFile = getCurrentFileIfPython();
+      if (cFile !== undefined) {
+        file = cFile;
+      } else {
+        const mFile = await this.pyPreferences.getPreferences(workspace).getMainFile();
+        if (mFile === undefined) {
+          return false;
+        }
+        file = mFile;
+      }
+    } else {
+      file = source.fsPath;
+    }
+
+    const prefs = this.preferences.getPreferences(workspace);
+
+    let deploy = `"${file}" deploy --team=${await prefs.getTeamNumber()}`;
+
+    if (prefs.getSkipTests()) {
+      deploy += ' --skip-tests';
+    }
+
+    await pythonRun(deploy, workspace.uri.fsPath, workspace, 'Python Deploy');
+
     return true;
   }
   public getDisplayName(): string {
@@ -71,7 +108,7 @@ class SimulateCodeDeployer implements ICodeDeployer {
     const currentLanguage = prefs.getCurrentLanguage();
     return currentLanguage === 'none' || currentLanguage === 'python';
   }
-  public async runDeployer(_: number, workspace: vscode.WorkspaceFolder): Promise<boolean> {
+  public async runDeployer(_: number, workspace: vscode.WorkspaceFolder, _source: vscode.Uri | undefined): Promise<boolean> {
     this.pyPreferences.getPreferences(workspace);
     return true;
   }

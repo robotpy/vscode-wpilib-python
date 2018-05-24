@@ -34,8 +34,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
     const pythonExtension = vscode.extensions.getExtension('ms-python.python');
     if (pythonExtension === undefined) {
-        // TODO: Make this a visible warning message when project detected is java
-        console.log('Could not find java extension. Debugging is disabled.');
+        // TODO: Make this a visible warning message when project detected is python
+        console.log('Could not find python extension. Debugging is disabled.');
         allowDebug = false;
     }
 

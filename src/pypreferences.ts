@@ -6,11 +6,10 @@ import * as vscode from 'vscode';
 import { promisifyMkDir, promisifyWriteFile } from './utilities';
 
 interface IPreferencesJson {
-  mainFile: string;
+  mainFile?: string;
 }
 
 const defaultPreferences: IPreferencesJson = {
-  mainFile: 'robot.py',
 };
 
 export class PyPreferences {
@@ -58,7 +57,14 @@ export class PyPreferences {
     });
   }
 
-  public getMainFile(): string {
+  public async getMainFile(): Promise<string | undefined> {
+    if (this.preferencesJson.mainFile === undefined) {
+      const selection = await this.requestMainFile();
+      if (selection !== undefined) {
+        await this.setMainFile(selection);
+        return selection;
+      }
+    }
     return this.preferencesJson.mainFile;
   }
 
@@ -71,6 +77,23 @@ export class PyPreferences {
     for (const d of this.disposables) {
       d.dispose();
     }
+  }
+
+  private async requestMainFile(): Promise<string | undefined> {
+    const glob = await vscode.workspace.findFiles(new vscode.RelativePattern(this.workspace, '*.py'));
+    if (glob.length === 0) {
+      return undefined;
+    }
+
+    const map = glob.map((v) => {
+      return path.basename(v.fsPath);
+    });
+
+    const selection = await vscode.window.showQuickPick(map, {
+      placeHolder: 'Pick a file to be your main file',
+    });
+
+    return selection;
   }
 
   private updatePreferences() {

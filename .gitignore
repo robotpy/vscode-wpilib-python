@@ -1,4 +1,9 @@
 out
+.gradle/
+bin/
 node_modules
 .vscode-test/
 *.vsix
+.project
+.settings/
+.classpath
