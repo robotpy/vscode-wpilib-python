@@ -1,5 +1,7 @@
 # vscode-wpilib-python README
 
+[![Build status](https://ci.appveyor.com/api/projects/status/wynepi3ns3j30037/branch/master?svg=true)](https://ci.appveyor.com/project/ThadHouse/vscode-wpilib-python/branch/master)
+
 ## Features
 
 Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
