@@ -1,0 +1,9 @@
+{
+  "title": "WPILibPythonSettings",
+  "type": "object",
+  "properties": {
+    "mainFile": {
+      "type": "string"
+    }
+  }
+}
