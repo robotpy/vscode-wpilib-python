@@ -34,7 +34,8 @@ export function executeCommandAsync(command: string, args: string[], rootDir: st
 }
 
 export async function pythonRun(args: string[], rootDir: string, _workspace: vscode.WorkspaceFolder, _name: string): Promise<number> {
-  const interpreter = 'python';
+  const configuration = vscode.workspace.getConfiguration();
+  const interpreter: string = configuration.get('python.pythonPath') || 'python';
 
   outputChannel.clear();
   outputChannel.show();
