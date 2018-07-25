@@ -3,10 +3,13 @@ import * as vscode from 'vscode';
 
 // This file is designed to be copied into an
 // external project to support the extension API
-
 export interface IPreferencesChangedPair {
   workspace: vscode.WorkspaceFolder;
   preference: IPreferences;
+}
+
+export interface ICreatorQuickPick extends vscode.QuickPickItem {
+  creator: IExampleTemplateCreator;
 }
 
 export interface IVersionable {
@@ -25,6 +28,18 @@ export abstract class IToolAPI implements IVersionable {
   }
 }
 
+const executeAPIExpectedVersion = 1;
+export function getExecuteAPIExpectedVersion(): number {
+  return executeAPIExpectedVersion;
+}
+export abstract class IExecuteAPI implements IVersionable {
+  public abstract executeCommand(command: string, name: string, rootDir: string, workspace: vscode.WorkspaceFolder): Promise<number>;
+  public abstract cancelCommands(): Promise<number>;
+  public getVersion(): number {
+    return executeAPIExpectedVersion;
+  }
+}
+
 const exampleTemplateAPIExpectedVersion = 1;
 export function getExampleTemplateAPIExpectedVersion(): number {
   return exampleTemplateAPIExpectedVersion;
@@ -32,8 +47,10 @@ export function getExampleTemplateAPIExpectedVersion(): number {
 export abstract class IExampleTemplateAPI implements IVersionable {
   public abstract addTemplateProvider(provider: IExampleTemplateCreator): void;
   public abstract addExampleProvider(provider: IExampleTemplateCreator): void;
-  public abstract createExample(): Promise<boolean>;
-  public abstract createTemplate(): Promise<boolean>;
+  public abstract getLanguages(template: boolean): string[];
+  public abstract getBases(template: boolean, language: string): ICreatorQuickPick[];
+  public abstract createProject(template: boolean, language: string, base: string, toFolder: string,
+                                newFolder: boolean, projectName: string, teamNumber: number): Promise<boolean>;
   public getVersion(): number {
     return exampleTemplateAPIExpectedVersion;
   }
@@ -109,6 +126,7 @@ export abstract class IExternalAPI implements IVersionable {
   public abstract getBuildTestAPI(): IBuildTestAPI;
   public abstract getPreferencesAPI(): IPreferencesAPI;
   public abstract getCommandAPI(): ICommandAPI;
+  public abstract getExecuteAPI(): IExecuteAPI;
   public getVersion(): number {
     return externalAPIExpectedVersion;
   }
@@ -116,7 +134,7 @@ export abstract class IExternalAPI implements IVersionable {
 
 export interface IPreferences {
   getTeamNumber(): Promise<number>;
-  setTeamNumber(teamNumber: number, global: boolean): Promise<void>;
+  setTeamNumber(teamNumber: number): Promise<void>;
   getCurrentLanguage(): string;
   setCurrentLanguage(language: string): Promise<void>;
   getAutoStartRioLog(): boolean;
@@ -127,6 +145,10 @@ export interface IPreferences {
   getOnline(): boolean;
   getSkipTests(): boolean;
   getStopSimulationOnEntry(): boolean;
+  getAdditionalGradleArguments(): string;
+  setOnline(value: boolean, global: boolean): Promise<void>;
+  setSkipTests(value: boolean, global: boolean): Promise<void>;
+  setStopSimulationOnEntry(value: boolean, global: boolean): Promise<void>;
 }
 
 export interface IExampleTemplateCreator {
