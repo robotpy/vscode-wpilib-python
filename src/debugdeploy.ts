@@ -76,10 +76,10 @@ class DeployCodeDeployer implements ICodeDeployer {
 
     const prefs = this.preferences.getPreferences(workspace);
 
-    let deploy = `"${file}" deploy --team=${await prefs.getTeamNumber()}`;
+    const deploy = [file, 'deploy', `--team=${await prefs.getTeamNumber()}`];
 
     if (prefs.getSkipTests()) {
-      deploy += ' --skip-tests';
+      deploy.push('--skip-tests');
     }
 
     await pythonRun(deploy, workspace.uri.fsPath, workspace, 'Python Deploy');

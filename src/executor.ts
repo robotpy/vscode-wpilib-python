@@ -4,12 +4,14 @@ import * as vscode from 'vscode';
 
 const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('python');
 
-export function executeCommandAsync(command: string, rootDir: string, ow?: vscode.OutputChannel): Promise<number> {
+export function executeCommandAsync(command: string, args: string[], rootDir: string, ow?: vscode.OutputChannel): Promise<number> {
   return new Promise((resolve, _) => {
-    const exec = child_process.exec;
-    const child = exec(command, {
+    const spawn = child_process.spawn;
+    const child = spawn(command, args, {
       cwd: rootDir,
-    }, (err) => {
+    });
+
+    child.on('exit', (err) => {
       if (err) {
         resolve(1);
       } else {
@@ -31,10 +33,11 @@ export function executeCommandAsync(command: string, rootDir: string, ow?: vscod
   });
 }
 
-export async function pythonRun(args: string, rootDir: string, _workspace: vscode.WorkspaceFolder, _name: string): Promise<number> {
-  const command = 'python ' + args;
+export async function pythonRun(args: string[], rootDir: string, _workspace: vscode.WorkspaceFolder, _name: string): Promise<number> {
+  const configuration = vscode.workspace.getConfiguration();
+  const interpreter: string = configuration.get('python.pythonPath') || 'python';
 
   outputChannel.clear();
   outputChannel.show();
-  return executeCommandAsync(command, rootDir, outputChannel);
+  return executeCommandAsync(interpreter, args, rootDir, outputChannel);
 }
