@@ -1,7 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { IBuildTestAPI, IPreferencesAPI } from './externalapi';
+import { IBuildTestAPI, IPreferencesAPI } from 'vscode-wpilibapi';
 import { PyPreferencesAPI } from './pypreferencesapi';
 
 export class BuildTest {

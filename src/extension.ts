@@ -3,11 +3,11 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { getWPILibApi, IExternalAPI } from 'vscode-wpilibapi';
 import { BuildTest } from './buildtest';
 import { Commands } from './commands';
 import { DebugDeploy } from './debugdeploy';
 import { Examples } from './examples';
-import { IExternalAPI } from './externalapi';
 import { PyPreferencesAPI } from './pypreferencesapi';
 import { Templates } from './templates';
 
@@ -19,15 +19,12 @@ export async function activate(context: vscode.ExtensionContext) {
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "vscode-wpilib-python" is now active!');
 
-    const baseExtension = vscode.extensions.getExtension<IExternalAPI>('wpifirst.vscode-wpilib');
 
-    if (baseExtension === undefined) {
-        await vscode.window.showErrorMessage('No Base WPILib Extension. Please install it');
+    const coreExports = await getWPILibApi();
+
+    if (coreExports === undefined) {
+        await vscode.window.showErrorMessage('No Base WPILib Extension Found. Please install it');
         return;
-    }
-
-    if (!baseExtension.isActive) {
-        await baseExtension.activate();
     }
 
     let allowDebug = true;
@@ -38,8 +35,6 @@ export async function activate(context: vscode.ExtensionContext) {
         console.log('Could not find python extension. Debugging is disabled.');
         allowDebug = false;
     }
-
-    const coreExports = baseExtension.exports;
 
     const preferences = coreExports.getPreferencesAPI();
     const debugDeployApi = coreExports.getDeployDebugAPI();

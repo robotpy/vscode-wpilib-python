@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as jsonc from 'jsonc-parser';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { IExampleTemplateAPI, IExampleTemplateCreator } from './externalapi';
+import { IExampleTemplateAPI, IExampleTemplateCreator } from 'vscode-wpilibapi';
 
 export interface IExampleJsonLayout {
   name: string;

@@ -5,7 +5,7 @@ import * as mkdirp from 'mkdirp';
 import * as ncp from 'ncp';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ICommandAPI, ICommandCreator, IPreferencesAPI } from './externalapi';
+import { ICommandAPI, ICommandCreator, IPreferencesAPI } from 'vscode-wpilibapi';
 import { getClassName } from './utilities';
 
 export interface IPythonJsonLayout {

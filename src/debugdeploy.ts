@@ -1,8 +1,8 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import { ICodeDeployer, IDeployDebugAPI, IPreferencesAPI } from 'vscode-wpilibapi';
 import { pythonRun } from './executor';
-import { ICodeDeployer, IDeployDebugAPI, IPreferencesAPI } from './externalapi';
 import { PyPreferencesAPI } from './pypreferencesapi';
 
 function getCurrentFileIfPython(): string | undefined {
