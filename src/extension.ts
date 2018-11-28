@@ -3,7 +3,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { getWPILibApi, IExternalAPI } from 'vscode-wpilibapi';
+import { getWPILibApi } from 'vscode-wpilibapi';
 import { BuildTest } from './buildtest';
 import { Commands } from './commands';
 import { DebugDeploy } from './debugdeploy';
@@ -18,7 +18,6 @@ export async function activate(context: vscode.ExtensionContext) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "vscode-wpilib-python" is now active!');
-
 
     const coreExports = await getWPILibApi();
 
