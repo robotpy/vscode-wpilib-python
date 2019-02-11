@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode';
 import { ICodeDeployer, IDeployDebugAPI, IPreferencesAPI } from 'vscode-wpilibapi';
-import { pythonRun } from './executor';
+import { PyExecutor } from './executor';
 import { PyPreferencesAPI } from './pypreferencesapi';
 
 function getCurrentFileIfPython(): string | undefined {
@@ -46,10 +46,12 @@ class DebugCodeDeployer implements ICodeDeployer {
 class DeployCodeDeployer implements ICodeDeployer {
   private preferences: IPreferencesAPI;
   private pyPreferences: PyPreferencesAPI;
+  private pyExecutor: PyExecutor;
 
-  constructor(preferences: IPreferencesAPI, pyPreferences: PyPreferencesAPI) {
+  constructor(preferences: IPreferencesAPI, pyPreferences: PyPreferencesAPI, pyExecutor: PyExecutor) {
     this.preferences = preferences;
     this.pyPreferences = pyPreferences;
+    this.pyExecutor = pyExecutor;
   }
 
   public async getIsCurrentlyValid(workspace: vscode.WorkspaceFolder): Promise<boolean> {
@@ -82,7 +84,7 @@ class DeployCodeDeployer implements ICodeDeployer {
       deploy.push('--skip-tests');
     }
 
-    const result = await pythonRun(deploy, workspace.uri.fsPath, workspace, 'Python Deploy');
+    const result = await this.pyExecutor.pythonRun(deploy, workspace.uri.fsPath, workspace, 'Python Deploy');
 
     return result === 0;
   }
@@ -125,12 +127,17 @@ export class DebugDeploy {
   private deployDeployer: DeployCodeDeployer;
   private simulator: SimulateCodeDeployer;
 
-  constructor(debugDeployApi: IDeployDebugAPI, preferences: IPreferencesAPI, pyPreferences: PyPreferencesAPI , allowDebug: boolean) {
-    debugDeployApi = debugDeployApi;
+  constructor(
+    debugDeployApi: IDeployDebugAPI,
+    preferences: IPreferencesAPI,
+    pyPreferences: PyPreferencesAPI,
+    pyExecutor: PyExecutor,
+    allowDebug: boolean,
+  ) {
     debugDeployApi.addLanguageChoice('python');
 
     this.debugDeployer = new DebugCodeDeployer(preferences, pyPreferences);
-    this.deployDeployer = new DeployCodeDeployer(preferences, pyPreferences);
+    this.deployDeployer = new DeployCodeDeployer(preferences, pyPreferences, pyExecutor);
     this.simulator = new SimulateCodeDeployer(preferences, pyPreferences);
 
     debugDeployApi.registerCodeDeploy(this.deployDeployer);

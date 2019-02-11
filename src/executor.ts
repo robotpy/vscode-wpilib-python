@@ -1,37 +1,58 @@
 'use strict';
-import * as child_process from 'child_process';
+
 import * as vscode from 'vscode';
 
-const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('python');
+export class PromiseCondition<T> {
+  private hasBeenSet: boolean = false;
+  private value?: T;
+  private condSet?: ((value: T) => void);
 
-export function executeCommandAsync(command: string, args: string[], rootDir: string, ow?: vscode.OutputChannel): Promise<number> {
-  return new Promise((resolve, _) => {
-    const spawn = child_process.spawn;
-    const child = spawn(command, args, {
-      cwd: rootDir,
+  public wait(): Promise<T> {
+    return new Promise((resolve, _) => {
+      this.condSet = resolve;
+      if (this.hasBeenSet === true) {
+        resolve(this.value);
+      }
     });
+  }
 
-    child.on('exit', resolve);
-
-    if (ow === undefined) {
-      return;
+  public set(value: T) {
+    this.value = value;
+    this.hasBeenSet = true;
+    if (this.condSet !== undefined) {
+      this.condSet(value);
     }
-
-    child.stdout.on('data', (data) => {
-      ow.append(data.toString());
-    });
-
-    child.stderr.on('data', (data) => {
-      ow.append(data.toString());
-    });
-  });
+  }
 }
 
-export async function pythonRun(args: string[], rootDir: string, workspace: vscode.WorkspaceFolder, _name: string): Promise<number> {
-  const configuration = vscode.workspace.getConfiguration('python', workspace.uri);
-  const interpreter: string = configuration.get('pythonPath', 'python');
+export class PyExecutor {
+  private runners = new Map<vscode.TaskExecution, PromiseCondition<number>>();
 
-  outputChannel.clear();
-  outputChannel.show();
-  return executeCommandAsync(interpreter, args, rootDir, outputChannel);
+  public constructor() {
+    vscode.tasks.onDidEndTaskProcess((e) => {
+      const cond = this.runners.get(e.execution);
+      if (cond !== undefined) {
+        cond.set(e.exitCode);
+        this.runners.delete(e.execution);
+      }
+    });
+  }
+
+  public async runCommand(command: string, args: string[], rootDir: string, workspace: vscode.WorkspaceFolder, name: string): Promise<number> {
+    const process = new vscode.ProcessExecution(command, args, {
+      cwd: rootDir,
+    });
+    const task = new vscode.Task({ type: 'wpilibpython' }, workspace, name, 'wpilib', process);
+    const execution = await vscode.tasks.executeTask(task);
+    const condition = new PromiseCondition<number>();
+    this.runners.set(execution, condition);
+    return condition.wait();
+  }
+
+  public async pythonRun(args: string[], rootDir: string, workspace: vscode.WorkspaceFolder, name: string): Promise<number> {
+    const configuration = vscode.workspace.getConfiguration('python', workspace.uri);
+    const interpreter: string = configuration.get('pythonPath', 'python');
+
+    return this.runCommand(interpreter, args, rootDir, workspace, name);
+  }
 }
