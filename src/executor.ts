@@ -11,13 +11,7 @@ export function executeCommandAsync(command: string, args: string[], rootDir: st
       cwd: rootDir,
     });
 
-    child.on('exit', (err) => {
-      if (err) {
-        resolve(1);
-      } else {
-        resolve(0);
-      }
-    });
+    child.on('exit', resolve);
 
     if (ow === undefined) {
       return;
