@@ -33,9 +33,9 @@ export function executeCommandAsync(command: string, args: string[], rootDir: st
   });
 }
 
-export async function pythonRun(args: string[], rootDir: string, _workspace: vscode.WorkspaceFolder, _name: string): Promise<number> {
-  const configuration = vscode.workspace.getConfiguration();
-  const interpreter: string = configuration.get('python.pythonPath') || 'python';
+export async function pythonRun(args: string[], rootDir: string, workspace: vscode.WorkspaceFolder, _name: string): Promise<number> {
+  const configuration = vscode.workspace.getConfiguration('python', workspace.uri);
+  const interpreter: string = configuration.get('pythonPath', 'python');
 
   outputChannel.clear();
   outputChannel.show();
