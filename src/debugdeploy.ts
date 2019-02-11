@@ -82,9 +82,9 @@ class DeployCodeDeployer implements ICodeDeployer {
       deploy.push('--skip-tests');
     }
 
-    await pythonRun(deploy, workspace.uri.fsPath, workspace, 'Python Deploy');
+    const result = await pythonRun(deploy, workspace.uri.fsPath, workspace, 'Python Deploy');
 
-    return true;
+    return result === 0;
   }
   public getDisplayName(): string {
     return 'python';
