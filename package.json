@@ -49,6 +49,11 @@
                 "url": "./resources/pythonschema.json"
             }
         ],
+        "taskDefinitions": [
+            {
+                "type": "wpilibpython"
+            }
+        ],
         "menus": {
             "explorer/context": [
                 {

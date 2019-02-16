@@ -8,6 +8,7 @@ import { BuildTest } from './buildtest';
 import { Commands } from './commands';
 import { DebugDeploy } from './debugdeploy';
 import { Examples } from './examples';
+import { PyExecutor } from './executor';
 import { PyPreferencesAPI } from './pypreferencesapi';
 import { Templates } from './templates';
 
@@ -42,12 +43,13 @@ export async function activate(context: vscode.ExtensionContext) {
     const buildTestApi = coreExports.getBuildTestAPI();
 
     const pyPrefs: PyPreferencesAPI = new PyPreferencesAPI();
+    const pyExecutor = new PyExecutor();
 
     const buildTest = new BuildTest(buildTestApi, preferences, pyPrefs);
 
     context.subscriptions.push(buildTest);
 
-    const debugDeploy = new DebugDeploy(debugDeployApi, preferences, pyPrefs, allowDebug);
+    const debugDeploy = new DebugDeploy(debugDeployApi, preferences, pyPrefs, pyExecutor, allowDebug);
 
     context.subscriptions.push(debugDeploy);
 
